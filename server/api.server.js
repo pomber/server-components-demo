@@ -100,7 +100,7 @@ const NOTES_PATH = path.resolve(__dirname, '../notes');
 
 app.post(
   '/notes',
-  handleErrors(async function (req, res) {
+  handleErrors(async function(req, res) {
     const note = insertNote(req.body.title, req.body.body);
     const insertedId = note.id;
     await writeFile(
@@ -114,7 +114,7 @@ app.post(
 
 app.put(
   '/notes/:id',
-  handleErrors(async function (req, res) {
+  handleErrors(async function(req, res) {
     const updatedId = Number(req.params.id);
     editNote(updatedId, req.body.title, req.body.body);
 
@@ -129,7 +129,7 @@ app.put(
 
 app.delete(
   '/notes/:id',
-  handleErrors(async function (req, res) {
+  handleErrors(async function(req, res) {
     deleteNote(req.params.id);
     await unlink(path.resolve(NOTES_PATH, `${req.params.id}.md`));
     sendResponse(req, res, null);
@@ -138,14 +138,14 @@ app.delete(
 
 app.get(
   '/notes',
-  handleErrors(async function (_req, res) {
+  handleErrors(async function(_req, res) {
     res.json(db);
   })
 );
 
 app.get(
   '/notes/:id',
-  handleErrors(async function (req, res) {
+  handleErrors(async function(req, res) {
     const note = findNote(req.params.id);
     res.json(note);
   })

@@ -24,12 +24,15 @@ const {readFileSync} = require('fs');
 const {unlink, writeFile} = require('fs').promises;
 const {pipeToNodeWritable} = require('react-server-dom-webpack/writer');
 const path = require('path');
-const {Pool} = require('pg');
 const React = require('react');
 const ReactApp = require('../src/App.server').default;
-
-// Don't keep credentials in the source tree in a real app!
-const pool = new Pool(require('../credentials'));
+const {
+  db,
+  findNote,
+  insertNote,
+  editNote,
+  deleteNote,
+} = require('../src/db.server');
 
 const PORT = 4000;
 const app = express();
@@ -42,7 +45,7 @@ app.listen(PORT, () => {
 });
 
 function handleErrors(fn) {
-  return async function(req, res, next) {
+  return async function (req, res, next) {
     try {
       return await fn(req, res);
     } catch (x) {
@@ -53,7 +56,7 @@ function handleErrors(fn) {
 
 app.get(
   '/',
-  handleErrors(async function(_req, res) {
+  handleErrors(async function (_req, res) {
     await waitForWebpack();
     const html = readFileSync(
       path.resolve(__dirname, '../build/index.html'),
@@ -89,7 +92,7 @@ function sendResponse(req, res, redirectToId) {
   });
 }
 
-app.get('/react', function(req, res) {
+app.get('/react', function (req, res) {
   sendResponse(req, res, null);
 });
 
@@ -97,13 +100,9 @@ const NOTES_PATH = path.resolve(__dirname, '../notes');
 
 app.post(
   '/notes',
-  handleErrors(async function(req, res) {
-    const now = new Date();
-    const result = await pool.query(
-      'insert into notes (title, body, created_at, updated_at) values ($1, $2, $3, $3) returning id',
-      [req.body.title, req.body.body, now]
-    );
-    const insertedId = result.rows[0].id;
+  handleErrors(async function (req, res) {
+    const note = insertNote(req.body.title, req.body.body);
+    const insertedId = note.id;
     await writeFile(
       path.resolve(NOTES_PATH, `${insertedId}.md`),
       req.body.body,
@@ -115,13 +114,10 @@ app.post(
 
 app.put(
   '/notes/:id',
-  handleErrors(async function(req, res) {
-    const now = new Date();
+  handleErrors(async function (req, res) {
     const updatedId = Number(req.params.id);
-    await pool.query(
-      'update notes set title = $1, body = $2, updated_at = $3 where id = $4',
-      [req.body.title, req.body.body, now, updatedId]
-    );
+    editNote(updatedId, req.body.title, req.body.body);
+
     await writeFile(
       path.resolve(NOTES_PATH, `${updatedId}.md`),
       req.body.body,
@@ -133,8 +129,8 @@ app.put(
 
 app.delete(
   '/notes/:id',
-  handleErrors(async function(req, res) {
-    await pool.query('delete from notes where id = $1', [req.params.id]);
+  handleErrors(async function (req, res) {
+    deleteNote(req.params.id);
     await unlink(path.resolve(NOTES_PATH, `${req.params.id}.md`));
     sendResponse(req, res, null);
   })
@@ -142,23 +138,20 @@ app.delete(
 
 app.get(
   '/notes',
-  handleErrors(async function(_req, res) {
-    const {rows} = await pool.query('select * from notes order by id desc');
-    res.json(rows);
+  handleErrors(async function (_req, res) {
+    res.json(db);
   })
 );
 
 app.get(
   '/notes/:id',
-  handleErrors(async function(req, res) {
-    const {rows} = await pool.query('select * from notes where id = $1', [
-      req.params.id,
-    ]);
-    res.json(rows[0]);
+  handleErrors(async function (req, res) {
+    const note = findNote(req.params.id);
+    res.json(note);
   })
 );
 
-app.get('/sleep/:ms', function(req, res) {
+app.get('/sleep/:ms', function (req, res) {
   setTimeout(() => {
     res.json({ok: true});
   }, req.params.ms);
@@ -167,7 +160,7 @@ app.get('/sleep/:ms', function(req, res) {
 app.use(express.static('build'));
 app.use(express.static('public'));
 
-app.on('error', function(error) {
+app.on('error', function (error) {
   if (error.syscall !== 'listen') {
     throw error;
   }

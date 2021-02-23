@@ -1,4 +1,6 @@
-# React Server Components Demo
+# React Server Components Demo 
+
+> This is a fork of the original demo without the Postgres dependency
 
 * [What is this?](#what-is-this)
 * [When will I be able to use this?](#when-will-i-be-able-to-use-this)
@@ -52,48 +54,9 @@ The app won't work until you set up the database, as described below.
 
 ## DB Setup
 
-This demo uses Postgres. First, follow its [installation link](https://wiki.postgresql.org/wiki/Detailed_installation_guides) for your platform.
+There is no database in this fork.
 
-Alternatively, you can check out this [fork](https://github.com/pomber/server-components-demo/) which will let you run the demo app without needing a database. However, you won't be able to execute SQL queries (but fetch should still work). There is also [another fork](https://github.com/prisma/server-components-demo) that uses Prisma with SQLite, so it doesn't require additional setup.
-
-The below example will set up the database for this app, assuming that you have a UNIX-like platform:
-
-### Step 1. Create the Database
-
-```
-psql postgres
-
-CREATE DATABASE notesapi;
-CREATE ROLE notesadmin WITH LOGIN PASSWORD 'password';
-ALTER ROLE notesadmin WITH SUPERUSER;
-ALTER DATABASE notesapi OWNER TO notesadmin;
-\q
-```
-
-### Step 2. Connect to the Database
-
-```
-psql -d postgres -U notesadmin;
-
-\c notesapi
-
-DROP TABLE IF EXISTS notes;
-CREATE TABLE notes (
-  id SERIAL PRIMARY KEY,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  title TEXT,
-  body TEXT
-);
-
-\q
-```
-
-### Step 3. Run the seed script
-
-Finally, run `npm run seed` to populate some data.
-
-And you're done!
+I replaced it with an object in `./src/db.server.js`.
 
 ## Notes about this app
 

@@ -21,9 +21,11 @@ This is a demo app built with Server Components, an experimental React feature. 
 
 ## When will I be able to use this?
 
-Server Components are an experimental feature and **are not ready for adoption**. For now, we recommend experimenting w Server Components via this demo app. **Use this in your own projects at your own risk.**
+Server Components are an experimental feature and **are not ready for adoption**. For now, we recommend experimenting with Server Components via this demo app. **Use this in your projects at your own risk.**
 
 ## Setup
+
+You will need to have nodejs >=14.9.0 in order to run this demo. [Node 14 LTS](https://nodejs.org/en/about/releases/) is a good choice! If using `nvm`, You can run `nvm i` command before running `npm install`: it will install the recommended node version for You!
 
   ```
   npm install
@@ -44,7 +46,7 @@ I replaced it with an object in `./src/db.server.js`.
 
 ## Notes about this app
 
-The demo is a note taking app called **React Notes**. It consists of a few major parts:
+The demo is a note-taking app called **React Notes**. It consists of a few major parts:
 
 - It uses a Webpack plugin (not defined in this repo) that allows us to only include client components in build artifacts
 - An Express server that:
@@ -56,12 +58,18 @@ This demo is built on top of our Webpack plugin, but this is not how we envision
 
 ### Interesting things to try
 
-- Expand note(s) by hovering over the note in the sidebar, and clicking the expand/collapse toggle. Next create or delete a note. What happens to the expanded notes?
+- Expand note(s) by hovering over the note in the sidebar, and clicking the expand/collapse toggle. Next, create or delete a note. What happens to the expanded notes?
 - Change a note's title while editing, and notice how editing an existing item animates in the sidebar. What happens if you edit a note in the middle of the list?
 - Search for any title. With the search text still in the search input, create a new note with a title matching the search text. What happens?
 - Search while on Slow 3G, observe the inline loading indicator.
 - Switch between two notes back and forth. Observe we don't send new responses next time we switch them again.
-- Uncomment the `fetch('http://localhost:4000/sleep/....')` calls in `NoteServer.js` and/or `NoteList.server.js` to introduce an artificial delay and trigger Suspense.
+- Uncomment the `fetch('http://localhost:4000/sleep/....')` call in `Note.server.js` or `NoteList.server.js` to introduce an artificial delay and trigger Suspense.
+  - If you only uncomment it in `Note.server.js`, you'll see the fallback every time you open a note.
+  - If you only uncomment it in `NoteList.server.js`, you'll see the list fallback on first page load.
+  - If you uncomment it in both, it won't be very interesting because we have nothing new to show until they both respond.
+- Add a new Server Component and place it above the search bar in `App.server.js`. Import `db` from `db.server` and use `db.query()` from it to get the number of notes. Oberserve what happens when you add or delete a note.
+
+You can watch a [recorded walkthrough of all these demo points here](https://youtu.be/La4agIEgoNg?t=600) (with timestamps).
 
 ## Built by (A-Z)
 

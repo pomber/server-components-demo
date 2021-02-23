@@ -6,6 +6,8 @@
  *
  */
 
+const {writeFile} = require('fs');
+const path = require('path');
 const startOfYear = require('date-fns/startOfYear');
 
 const now = new Date();
@@ -51,6 +53,17 @@ notes in this app! These note live on the server in the \`notes\` folder.
     body: 'It was an excellent note.',
   },
 ];
+
+const NOTES_PATH = path.resolve(__dirname, '../notes');
+
+db.map((item) => {
+  writeFile(
+    path.resolve(NOTES_PATH, `${item.id}.md`),
+    item.body,
+    {encoding: 'utf8'},
+    () => {}
+  );
+});
 
 let nextId = db.length;
 

@@ -13,7 +13,7 @@ register();
 const babelRegister = require('@babel/register');
 
 babelRegister({
-  ignore: [/\/(build|server|node_modules)\//],
+  ignore: [/[\\\/](build|server|node_modules)[\\\/]/],
   presets: [['react-app', {runtime: 'automatic'}]],
   plugins: ['@babel/transform-modules-commonjs'],
 });
@@ -21,7 +21,7 @@ babelRegister({
 const express = require('express');
 const compress = require('compression');
 const {readFileSync} = require('fs');
-const {unlink, writeFile} = require('fs/promises');
+const {unlink, writeFile} = require('fs').promises;
 const {pipeToNodeWritable} = require('react-server-dom-webpack/writer');
 const path = require('path');
 const React = require('react');
@@ -45,7 +45,7 @@ app.listen(PORT, () => {
 });
 
 function handleErrors(fn) {
-  return async function(req, res, next) {
+  return async function (req, res, next) {
     try {
       return await fn(req, res);
     } catch (x) {
@@ -56,7 +56,7 @@ function handleErrors(fn) {
 
 app.get(
   '/',
-  handleErrors(async function(_req, res) {
+  handleErrors(async function (_req, res) {
     await waitForWebpack();
     const html = readFileSync(
       path.resolve(__dirname, '../build/index.html'),
@@ -92,7 +92,7 @@ function sendResponse(req, res, redirectToId) {
   });
 }
 
-app.get('/react', function(req, res) {
+app.get('/react', function (req, res) {
   sendResponse(req, res, null);
 });
 
@@ -151,7 +151,7 @@ app.get(
   })
 );
 
-app.get('/sleep/:ms', function(req, res) {
+app.get('/sleep/:ms', function (req, res) {
   setTimeout(() => {
     res.json({ok: true});
   }, req.params.ms);
@@ -160,7 +160,7 @@ app.get('/sleep/:ms', function(req, res) {
 app.use(express.static('build'));
 app.use(express.static('public'));
 
-app.on('error', function(error) {
+app.on('error', function (error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
